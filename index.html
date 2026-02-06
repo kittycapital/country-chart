@@ -169,6 +169,7 @@
         let currentPeriod = 'YTD';
         let chart = null;
         let hiddenAssets = new Set();
+        let selectedAsset = null;
         
         // 기간별 날짜 계산
         function getStartDate(period) {
@@ -207,16 +208,31 @@
                 
                 const percentData = calculatePercentChange(data.prices, startDate);
                 if (percentData.length > 0) {
+                    let borderWidth = 2;
+                    let borderColor = data.color;
+                    
+                    if (selectedAsset) {
+                        if (symbol === selectedAsset) {
+                            borderWidth = 4;
+                            borderColor = data.color;
+                        } else {
+                            borderWidth = 1;
+                            borderColor = data.color + '50';
+                        }
+                    }
+                    
                     datasets.push({
                         label: symbol,
                         data: percentData,
-                        borderColor: data.color,
+                        borderColor: borderColor,
                         backgroundColor: data.color + '20',
-                        borderWidth: 1.5,
+                        borderWidth: borderWidth,
                         pointRadius: 0,
-                        pointHoverRadius: 3,
+                        pointHoverRadius: 4,
                         tension: 0.1,
-                        fill: false
+                        fill: false,
+                        originalColor: data.color,
+                        symbol: symbol
                     });
                 }
             });
@@ -357,10 +373,20 @@
             list.innerHTML = sorted.map(asset => {
                 const perfClass = asset.perf >= 0 ? 'positive' : 'negative';
                 const perfSign = asset.perf >= 0 ? '+' : '';
-                const opacity = hiddenAssets.has(asset.symbol) ? '0.3' : '1';
+                const isHidden = hiddenAssets.has(asset.symbol);
+                const isSelected = selectedAsset === asset.symbol;
+                
+                let opacity = '1';
+                if (isHidden) {
+                    opacity = '0.3';
+                } else if (selectedAsset && !isSelected) {
+                    opacity = '0.4';
+                }
+                
+                const selectedStyle = isSelected ? 'background: #1f2937; border-radius: 6px; padding-left: 8px; margin-left: -8px; padding-right: 8px; margin-right: -8px;' : '';
                 
                 return `
-                    <li class="stats-item" style="opacity: ${opacity}">
+                    <li class="stats-item" data-symbol="${asset.symbol}" style="opacity: ${opacity}; cursor: pointer; ${selectedStyle}">
                         <div class="stats-asset">
                             <div class="stats-dot" style="background: ${asset.color}"></div>
                             <span class="stats-name">${asset.symbol} <span class="stats-symbol">(${asset.name})</span></span>
@@ -369,6 +395,20 @@
                     </li>
                 `;
             }).join('');
+            
+            // Stats 아이템 클릭 이벤트
+            list.querySelectorAll('.stats-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const symbol = item.dataset.symbol;
+                    if (selectedAsset === symbol) {
+                        selectedAsset = null;
+                    } else {
+                        selectedAsset = symbol;
+                    }
+                    updateChart();
+                    updateStats();
+                });
+            });
         }
         
         // 범례 생성
