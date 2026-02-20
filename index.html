@@ -273,6 +273,8 @@
 
         /* === MOBILE === */
         @media (max-width: 600px) {
+            html, body { overflow-y: auto; overflow-x: hidden; }
+            .container { height: auto; min-height: 100%; }
             .header { padding: 14px 12px 10px; }
             .header h1 { font-size: 16px; }
             .share-bar { gap: 4px; margin: 8px 0 2px; }
@@ -291,13 +293,16 @@
             }
             .main-content {
                 grid-template-columns: 1fr;
-                grid-template-rows: 1fr auto;
+                grid-template-rows: auto auto;
                 gap: 8px;
                 padding: 0 10px;
+                flex: none;
             }
             .chart-container {
                 padding: 8px 4px 8px 8px;
                 border-radius: 10px;
+                min-height: 300px;
+                height: 300px;
             }
             .chart-container::after { font-size: 18px; }
             .stats-box {
@@ -323,6 +328,7 @@
         @media (max-width: 420px) {
             .header { padding: 10px 8px 8px; }
             .header h1 { font-size: 14px; }
+            .chart-container { min-height: 260px; height: 260px; }
             .stats-box { max-height: 130px; }
             .legend { gap: 4px; padding: 6px 8px; }
             .legend-label { font-size: 8px; }
